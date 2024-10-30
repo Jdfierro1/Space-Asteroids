@@ -147,6 +147,8 @@ class Missile(Sprite):
     
     def fire(self):
         if self.status == "ready":
+            #Play the sound
+            os.system("afplay fire.wav&")
             self.goto(player.xcor(), player.ycor())
             self.setheading(player.heading())
             self.status = "firing"
@@ -188,12 +190,21 @@ class Game():
         self.pen.penup()
         self.pen.ht()
 
+    def show_status(self):
+        self.pen.undo()
+        msg = "Score: %s" %(self.score)
+        self.pen.penup()
+        self.pen.goto(-300, 310)
+        self.pen.write(msg, font =("Arial", 16, "normal"))
+        
+
 ##########################
 # Create Class Variables #
 ##########################
 
 game = Game()
 game.draw_border()
+game.show_status()
 player = Player("triangle", "orange", 0 ,0)
 enemy = Enemy("circle", "red", random.randint(0, 360), random.randint(0, 360))
 ally = Ally("triangle", "blue", random.randint(0, 360), random.randint(0, 360))
@@ -221,18 +232,35 @@ while True:
     if player.is_collission(enemy):
         x = random.randint(-250, 250)
         y = random.randint(-250, 250)
+        os.system("afplay bangLarge.wav&")
         player.speed = 1
+        game.score -= 50
         enemy.goto(x, y)
+        game.show_status()
+        
+    if player.is_collission(ally):
+        ally.setheading(random.randint(-250, 250))
+        os.system("afplay bangLarge.wav&")
+        game.score -= 50
+        game.show_status()
 
     # Check for a missile collission 
     if missile.is_collission(enemy):
         x = random.randint(-250, 250)
         y = random.randint(-250, 250)
         enemy.goto(x, y)
+        os.system("afplay bangSmall.wav&")
         missile.status = "ready"
+        game.score += 100
+        game.show_status()
+        
+    elif missile.is_collission(ally):
+        missile.status = "ready"
+        os.system("afplay bangSmall.wav&")
+        game.score -= 100
+        game.show_status()
     
     #CHeck for ally collission with player 
-    if player.is_collission(ally):
-        ally.setheading(random.randint(-250, 250))
+
         
 #delay = raw_input("Press enter to finish. >")
