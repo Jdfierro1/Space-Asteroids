@@ -15,7 +15,9 @@ Requirements to run:
 
 10/31 Update
 - Added multiple allies and enemies
-- improved FPS drastically 
+- improved FPS drastically
+- added explosion visuals when a missile hits an enemy, or when player runs into an enemy
+- added a visually appealing background (we are fighting in space after all!) 
 
 10/30 Update
 - Added sound effects when you fire a missile
