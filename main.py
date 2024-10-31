@@ -1,6 +1,7 @@
 import os
 import random
 import turtle 
+import time 
 
 #Required by MacOS to show window 
 turtle.fd(0) 
@@ -13,7 +14,7 @@ turtle.ht()
 #Save memory 
 turtle.setundobuffer(1)
 #This speeds up drawing 
-turtle.tracer(1) 
+turtle.tracer(0)
 
 ######################
 #     Sprite Class   # 
@@ -206,9 +207,16 @@ game = Game()
 game.draw_border()
 game.show_status()
 player = Player("triangle", "orange", 0 ,0)
-enemy = Enemy("circle", "red", random.randint(0, 360), random.randint(0, 360))
-ally = Ally("triangle", "blue", random.randint(0, 360), random.randint(0, 360))
+#enemy = Enemy("circle", "red", random.randint(0, 360), random.randint(0, 360))
+#ally = Ally("triangle", "blue", random.randint(0, 360), random.randint(0, 360))
 missile = Missile("square", "yellow", 0, 0)
+enemies = []
+for i in range(5):
+    enemies.append(Enemy("circle", "red", random.randint(0, 360), random.randint(0, 360)))
+
+allies = []
+for i in range (3):
+    allies.append(Ally("triangle", "blue", random.randint(0, 360), random.randint(0, 360)))
 
 #####################
 # Keyboard Bindings #
@@ -223,44 +231,51 @@ turtle.listen()
 
 #Main Game Loop 
 while True:
+    turtle.update()
+    time.sleep(0.02)
     player.move()
-    enemy.move()
+    #USe these if you have 1 enemy and 1 ally, but since we have a list of enemies/allies
+    # we have them commented out 
+    #enemy.move()
+    #ally.move()
     missile.move()
-    ally.move()
+
+
+    for enemy in enemies: 
+        enemy.move()
 
     #Check for a space ship collission
-    if player.is_collission(enemy):
-        x = random.randint(-250, 250)
-        y = random.randint(-250, 250)
-        os.system("afplay bangLarge.wav&")
-        player.speed = 1
-        game.score -= 50
-        enemy.goto(x, y)
-        game.show_status()
-        
-    if player.is_collission(ally):
-        ally.setheading(random.randint(-250, 250))
-        os.system("afplay bangLarge.wav&")
-        game.score -= 50
-        game.show_status()
+        if player.is_collission(enemy):
+            x = random.randint(-250, 250)
+            y = random.randint(-250, 250)
+            os.system("afplay bangLarge.wav&")
+            player.speed = 1
+            game.score -= 50
+            enemy.goto(x, y)
+            game.show_status()
 
-    # Check for a missile collission 
-    if missile.is_collission(enemy):
-        x = random.randint(-250, 250)
-        y = random.randint(-250, 250)
-        enemy.goto(x, y)
-        os.system("afplay bangSmall.wav&")
-        missile.status = "ready"
-        game.score += 100
-        game.show_status()
+        if missile.is_collission(enemy):
+            x = random.randint(-250, 250)
+            y = random.randint(-250, 250)
+            enemy.goto(x, y)
+            os.system("afplay bangSmall.wav&")
+            missile.status = "ready"
+            game.score += 100
+            game.show_status()
         
-    elif missile.is_collission(ally):
-        missile.status = "ready"
-        os.system("afplay bangSmall.wav&")
-        game.score -= 100
-        game.show_status()
-    
-    #CHeck for ally collission with player 
+    for ally in allies: 
+        ally.move()    
+        if player.is_collission(ally):
+            ally.setheading(random.randint(-250, 250))
+            os.system("afplay bangLarge.wav&")
+            game.score -= 50
+            game.show_status()
+
+        elif missile.is_collission(ally):
+            missile.status = "ready"
+            os.system("afplay bangSmall.wav&")
+            game.score -= 100
+            game.show_status()
 
         
 #delay = raw_input("Press enter to finish. >")
