@@ -2,13 +2,29 @@ import os
 import random
 import turtle 
 import time 
+from PIL import Image
 
 #Required by MacOS to show window 
 turtle.fd(0) 
 #Set the animations speed to max 
 turtle.speed(0)
+#Window Title
+turtle.title("Space Asteroids")
 #Change the background color 
 turtle.bgcolor("black")
+
+#Background image
+original_image_path = "asteroids.gif"
+resized_image_path = "updated_asteroids.gif"
+
+# Open and resize the image
+with Image.open(original_image_path) as img:
+    resized_img = img.resize((600, 600))
+    resized_img.save(resized_image_path)
+turtle.bgpic(resized_image_path) 
+
+#turtle.bgpic("asteroids.gif")
+
 #Hide default turtle
 turtle.ht() 
 #Save memory 
@@ -66,7 +82,7 @@ class Sprite(turtle.Turtle):
 class Player(Sprite):
     def __init__(self, spriteshape, color, startx, starty):
         Sprite.__init__(self, spriteshape, color, startx, starty)
-        self.shapesize(stretch_wid=1, stretch_len=0.6, outline=3)  # 3-pixel outline width
+        self.shapesize(stretch_wid=.6, stretch_len=1, outline=3)  # 3-pixel outline width
         self.setheading(random.randint(0,360))
         #Lets make the player a little faster than the default Sprite
         self.speed = 4
@@ -166,6 +182,32 @@ class Missile(Sprite):
             self.goto(-1000, 1000)
             self.status = "ready"
 
+
+#########################
+#   Particle Class      #
+#########################
+
+class Particle(Sprite):
+    def __init__(self, spriteshape, color, startx, starty):
+        Sprite.__init__(self, spriteshape, color, startx, starty)
+        self.shapesize(stretch_wid=0.1, stretch_len=0.1, outline=3)  # 3-pixel outline width
+        self.frame = 0
+        self.goto(-1000,1000)
+
+    def explode(self, startx, starty):
+        self.goto(startx, starty)
+        self.frame = 1
+        self.setheading(random.randint(0, 360))
+
+    def move(self):
+        if self.frame > 0:
+            self.fd(10)
+            self.frame += 1
+        if self.frame > 35:
+            self.frame = 0
+            self.goto(-1000, 1000)
+        self.setheading(random.randint(0, 360))
+
 #####################
 #   Game Class      #
 #####################
@@ -218,6 +260,10 @@ allies = []
 for i in range (3):
     allies.append(Ally("triangle", "blue", random.randint(0, 360), random.randint(0, 360)))
 
+particles = []
+for i in range(20):
+    particles.append(Particle("circle", "orange", 0, 0))
+
 #####################
 # Keyboard Bindings #
 #####################
@@ -240,7 +286,6 @@ while True:
     #ally.move()
     missile.move()
 
-
     for enemy in enemies: 
         enemy.move()
 
@@ -253,6 +298,9 @@ while True:
             game.score -= 50
             enemy.goto(x, y)
             game.show_status()
+            for particle in particles:
+                particle.explode(player.xcor(), player.ycor())
+                #particle.goto(player.xcor(), player.ycor())
 
         if missile.is_collission(enemy):
             x = random.randint(-250, 250)
@@ -262,7 +310,11 @@ while True:
             missile.status = "ready"
             game.score += 100
             game.show_status()
-        
+            for particle in particles:
+                particle.explode(missile.xcor(), missile.ycor())
+                #particle.goto(missile.xcor(), missile.ycor())
+                
+
     for ally in allies: 
         ally.move()    
         if player.is_collission(ally):
@@ -276,6 +328,8 @@ while True:
             os.system("afplay bangSmall.wav&")
             game.score -= 100
             game.show_status()
-
+    
+    for particle in particles:
+        particle.move()
         
 #delay = raw_input("Press enter to finish. >")
